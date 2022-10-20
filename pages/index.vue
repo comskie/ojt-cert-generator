@@ -3,6 +3,12 @@ import jsPDF from "jspdf";
 
 const name = ref<string>();
 const loading = ref<boolean>(false);
+const certTypes = [
+  "Multimedia Workshop",
+  "Programming Workshop",
+  "MS Office Workshop",
+];
+const selectedCertType = ref(0);
 
 function submit() {
   loading.value = true;
@@ -18,13 +24,30 @@ function submit() {
     "normal"
   );
 
-  doc.addImage("/programming-workshop-template.png", "PNG", 0, 0, 29.7, 21);
+  doc.addFont("/fonts/poppins/Poppins-Regular.ttf", "Poppins", "normal");
+
+  doc.addImage("/template.png", "PNG", 0, 0, 29.7, 21);
 
   doc.setFont("GreatVibes").setFontSize(54.9).text(name.value, 1.4, 11.05);
 
-  doc.save(
-    `${transformToSnakeCase(name.value)}_programming_workshop_${Date.now()}.pdf`
-  );
+  const description = `
+  Has successfully completed the "${certTypes[selectedCertType.value]}"
+
+  Given this 7th day of September 2022 via Zoom Platform
+  `;
+
+  doc.setFont("Poppins").setFontSize(14.9).text(description, 9.6, 12.5, {
+    align: "center",
+    maxWidth: 16.2,
+    baseline: "top",
+    lineHeightFactor: 1.49,
+  });
+
+  const filename = `${transformToSnakeCase(name.value)}_${transformToSnakeCase(
+    certTypes[selectedCertType.value]
+  )}_${Date.now()}.pdf`;
+
+  doc.save(filename);
   loading.value = false;
 }
 
@@ -55,6 +78,24 @@ function transformToSnakeCase(str: string) {
               required
               class="mt-1 w-full text-xl rounded-md border-gray-300 focus:border-indigo-400 focus:ring focus:ring-indigo-200/50"
             />
+
+            <div class="mt-4">
+              <label class="text-2xl font-semibold text-indigo-500">
+                Certificate Type
+              </label>
+              <select
+                v-model="selectedCertType"
+                class="mt-1 w-full text-xl rounded-md border-gray-300 focus:border-indigo-400 focus:ring focus:ring-indigo-200/50"
+              >
+                <option
+                  v-for="(certType, index) in certTypes"
+                  :value="index"
+                  :key="index"
+                >
+                  {{ certType }}
+                </option>
+              </select>
+            </div>
             <div class="mt-4 flex justify-end">
               <button
                 type="submit"
